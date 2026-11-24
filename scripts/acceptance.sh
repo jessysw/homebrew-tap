@@ -9,7 +9,7 @@ cp "$formula" "$root/new.rb"
 trap 'cp "$root/new.rb" "$formula"; if [ -f "$root/pg/postmaster.pid" ]; then "$pg/pg_ctl" -D "$root/pg" -m fast stop; fi' EXIT
 brew install postgresql@18
 pg="$(brew --prefix postgresql@18)/bin"
-"$pg/initdb" -D "$root/pg" -A trust -U acceptance --no-locale > "$root/initdb.log"
+"$pg/initdb" -D "$root/pg" -A trust -U acceptance --no-locale --encoding=UTF8 > "$root/initdb.log"
 "$pg/pg_ctl" -D "$root/pg" -l "$root/postgres.log" -o "-h 127.0.0.1 -p 55484 -k $root" start
 "$pg/createdb" -h 127.0.0.1 -p 55484 -U acceptance contitext_test
 export DATABASE_URL=postgresql+psycopg://acceptance@127.0.0.1:55484/contitext_test
@@ -20,7 +20,9 @@ if [ -n "${BASE_FORMULA:-}" ]; then
   upgrade=true
 elif [[ "${BASE_SHA:-}" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "$BASE_SHA:Formula/contitext.rb" 2>/dev/null; then
   git show "$BASE_SHA:Formula/contitext.rb" > "$root/old.rb"
-  if ! cmp -s "$root/old.rb" "$root/new.rb"; then
+  old_source=$(sed -n '/^  url /{p;q;}' "$root/old.rb")
+  new_source=$(sed -n '/^  url /{p;q;}' "$root/new.rb")
+  if [ "$old_source" != "$new_source" ]; then
     cp "$root/old.rb" "$formula"
     upgrade=true
   fi
@@ -53,6 +55,7 @@ cmp "$root/client.json" "$root/client.json.original"
 cmp "$root/before.json" "$root/after.json"
 "$cli" --env-file "$root/private.env" mcp-smoke
 "$python" "$(brew --prefix contitext)/share/contitext/scripts/check_hook_installation.py" --connection "$root/client.json" --project personal/demo --directory "$root/hooks"
+"$(brew --prefix python@3.14)/bin/python3.14" -m pip --python "$python" check
 brew test jessysw/tap/contitext
 count_before=$("$pg/psql" -h 127.0.0.1 -p 55484 -U acceptance -d contitext_test -Atc 'SELECT count(*) FROM context_events')
 brew uninstall contitext
