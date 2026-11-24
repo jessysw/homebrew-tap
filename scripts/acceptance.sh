@@ -9,7 +9,7 @@ cp "$formula" "$root/new.rb"
 trap 'cp "$root/new.rb" "$formula"; if [ -f "$root/pg/postmaster.pid" ]; then "$pg/pg_ctl" -D "$root/pg" -m fast stop; fi' EXIT
 brew install postgresql@18
 pg="$(brew --prefix postgresql@18)/bin"
-"$pg/initdb" -D "$root/pg" -A trust -U acceptance --no-locale > "$root/initdb.log"
+"$pg/initdb" -D "$root/pg" -A trust -U acceptance --no-locale --encoding=UTF8 > "$root/initdb.log"
 "$pg/pg_ctl" -D "$root/pg" -l "$root/postgres.log" -o "-h 127.0.0.1 -p 55484 -k $root" start
 "$pg/createdb" -h 127.0.0.1 -p 55484 -U acceptance contitext_test
 export DATABASE_URL=postgresql+psycopg://acceptance@127.0.0.1:55484/contitext_test
