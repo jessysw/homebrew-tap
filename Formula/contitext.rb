@@ -212,14 +212,14 @@ class Contitext < Formula
   def install
     # Homebrew supplies libpq; build Psycopg's C implementation against it.
     inreplace "pyproject.toml", "psycopg[binary]", "psycopg[c]"
-    virtualenv_install_with_resources
+    virtualenv_install_with_resources system_site_packages: false
     pkgshare.install "scripts", "integrations", "docs"
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/contitext --version")
     system bin/"contitext", "init", "--project", "demo", "--output", testpath/"private.env"
-    assert_predicate testpath/"private.env", :exist?
+    assert_path_exists testpath/"private.env"
     assert_match "project", shell_output("#{bin}/contitext --help")
   end
 end

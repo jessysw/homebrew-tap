@@ -20,7 +20,9 @@ if [ -n "${BASE_FORMULA:-}" ]; then
   upgrade=true
 elif [[ "${BASE_SHA:-}" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "$BASE_SHA:Formula/contitext.rb" 2>/dev/null; then
   git show "$BASE_SHA:Formula/contitext.rb" > "$root/old.rb"
-  if ! cmp -s "$root/old.rb" "$root/new.rb"; then
+  old_source=$(sed -n '/^  url /{p;q;}' "$root/old.rb")
+  new_source=$(sed -n '/^  url /{p;q;}' "$root/new.rb")
+  if [ "$old_source" != "$new_source" ]; then
     cp "$root/old.rb" "$formula"
     upgrade=true
   fi
@@ -53,6 +55,7 @@ cmp "$root/client.json" "$root/client.json.original"
 cmp "$root/before.json" "$root/after.json"
 "$cli" --env-file "$root/private.env" mcp-smoke
 "$python" "$(brew --prefix contitext)/share/contitext/scripts/check_hook_installation.py" --connection "$root/client.json" --project personal/demo --directory "$root/hooks"
+"$(brew --prefix python@3.14)/bin/python3.14" -m pip --python "$python" check
 brew test jessysw/tap/contitext
 count_before=$("$pg/psql" -h 127.0.0.1 -p 55484 -U acceptance -d contitext_test -Atc 'SELECT count(*) FROM context_events')
 brew uninstall contitext
