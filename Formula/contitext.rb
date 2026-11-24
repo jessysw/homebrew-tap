@@ -3,8 +3,8 @@ class Contitext < Formula
 
   desc "Project continuity for AI agents"
   homepage "https://github.com/jessysw/contitext"
-  url "https://files.pythonhosted.org/packages/6f/c5/e0f24e5b54a5d2888e144a5cf23b14e68cc9b4f8e87e8a42e323dad4b4c0/contitext-0.8.3.tar.gz"
-  sha256 "f6e2600b058cbfbdc566bcce9b481255603713a28503a5d78723f39232dd6bf8"
+  url "https://files.pythonhosted.org/packages/d3/5b/32c8c17f3f5f82f7dd79f9da069e46c548180dd467365fc67f3b41bdfd3d/contitext-0.8.4.tar.gz"
+  sha256 "7afe7b908c2dc385387df9e394f24548d83906adb3e7d64bfb953128c09ab3ab"
   license "Apache-2.0"
 
   depends_on "pkgconf" => :build
